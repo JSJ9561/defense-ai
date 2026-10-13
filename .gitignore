@@ -16,7 +16,7 @@ __pycache__/
 secrets/
 
 # Local experiment settings
-config/local/
+configs/local/
 experiments/private/
 
 # IDE and OS
