@@ -1,4 +1,3 @@
-
 import ipaddress
 import json
 from dataclasses import dataclass
@@ -22,10 +21,8 @@ EVENT_FIELDS = {
 
 AUTH_FIELDS = {"service", "username", "source_ip"}
 
-
 class EventValidationError(ValueError):
     """보안 이벤트의 데이터 형식이 올바르지 않을 때 발생하는 오류."""
-
 
 def validate_timestamp(value, field_name, allow_none=False):
     if value is None and allow_none:
@@ -58,6 +55,7 @@ def reject_duplicate_keys(pairs):
 
     return result
 
+# 보안 이벤트 데이터 모델
 @dataclass(frozen=True)
 class SecurityEvent:
     schema_version: str

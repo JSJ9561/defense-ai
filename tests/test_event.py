@@ -1,12 +1,10 @@
-
 import unittest
-
 from common.event import (
     EventValidationError,
     SecurityEvent,
 )
 
-
+# 보안 이벤트 데이터 검증 테스트
 class TestSecurityEvent(unittest.TestCase):
 
     def setUp(self):
@@ -112,7 +110,7 @@ class TestSecurityEvent(unittest.TestCase):
 
     def test_attributes_immutable(self):
         with self.assertRaises(TypeError):
-                self.event.attributes["password"] = "secret"
+            self.event.attributes["password"] = "secret"
 
     def test_attributes_defensive_copy(self):
         data = self.event.to_dict()
