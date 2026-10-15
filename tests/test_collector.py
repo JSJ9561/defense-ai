@@ -17,14 +17,14 @@ class TestCollector(unittest.TestCase):
                                   year=2026,
                                   agent_id='rocky-agent-01',
                                   host_id='rocky-vm-01'
-            )
+                                 )
 
             self.assertEqual(len(events), 1)
             self.assertEqual(events[0].attributes['username'], 'secadmin')
             self.assertEqual(events[0].attributes["source_ip"], "192.0.2.10")
             self.assertEqual(events[0].occurred_at, "2026-10-14T13:47:50Z")
 
-    # 빈 로그 파일 수집 테스트
+    # 빈 로그 파일 수집 테스트 함수
     def test_empty_file(self):
         with TemporaryDirectory() as temp_dir:
             path = Path(temp_dir) / 'secure_log'
@@ -35,7 +35,7 @@ class TestCollector(unittest.TestCase):
                                   year=2026,
                                   agent_id='rocky-agent-01',
                                   host_id='rocky-vm-01'
-            )
+                                 )
 
             self.assertEqual(events, [])
 
@@ -48,7 +48,8 @@ class TestFollowFile(unittest.TestCase):
             path.write_text(logs, encoding='utf-8')
 
             appended = False
-            # 대기 시 새 로그 추가 코드
+
+            # 대기 시 새 로그 추가 함수
             def append_new_line(seconds):
                 nonlocal appended
                 if appended:
@@ -65,7 +66,7 @@ class TestFollowFile(unittest.TestCase):
                                      year=2026,
                                      agent_id='rocky-agent-01',
                                      host_id='rocky-vm-01'
-                )
+                                    )
 
                 try:
                     event = next(stream)
@@ -97,7 +98,80 @@ class TestFollowFile(unittest.TestCase):
                                      year=2026,
                                      agent_id='rocky-agent-01',
                                      host_id='rocky-vm-01'
-                )
+                                    )
+
+                try:
+                    event = next(stream)
+                    self.assertEqual(wait_count, 2)
+                    self.assertEqual(event.attributes['username'], 'newuser')
+                finally:
+                    stream.close()
+
+    # 파일 잘림 후 수집 검증 함수
+    def test_follow_truncated_file(self):
+        with TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / 'secure_log'
+            logs = 'Oct 14 22:47:50 defense-rocky sshd-session[4371]: Failed password for olduser from 192.0.2.10 port 52723 ssh2\n'
+            path.write_text(logs, encoding='utf-8')
+
+            wait_count = 0
+
+            # 대기 시 파일 잘림과 새 로그 기록
+            def truncate_and_append(seconds):
+                nonlocal wait_count
+                wait_count += 1
+                if wait_count == 1:
+                    path.write_text('', encoding='utf-8')
+                elif wait_count == 2:
+                    with open(path, 'a', encoding='utf-8') as log_file:
+                        logs = 'Oct 14 22:47:50 defense-rocky sshd-session[4371]: Failed password for newuser from 192.0.2.10 port 52723 ssh2\n'
+                        log_file.write(logs)
+                else:
+                    self.fail('파일 잘림 후 새 로그가 반환되지 않았습니다.')
+
+            with patch('agent.collector.sleep', side_effect=truncate_and_append):
+                stream = follow_file(path=str(path),
+                                     year=2026,
+                                     agent_id='rocky-agent-01',
+                                     host_id='rocky-vm-01'
+                                    )
+
+                try:
+                    event = next(stream)
+                    self.assertEqual(wait_count, 2)
+                    self.assertEqual(event.attributes['username'], 'newuser')
+                finally:
+                    stream.close()
+
+    # 파일 교체 후 수집 검증 함수
+    def test_follow_replaced_file(self):
+        with TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / 'secure_log'
+            rotated_path = Path(temp_dir) / 'secure_log.1'
+            logs = 'Oct 14 22:47:50 defense-rocky sshd-session[4371]: Failed password for olduser from 192.0.2.10 port 52723 ssh2\n'
+            path.write_text(logs, encoding='utf-8')
+
+            wait_count = 0
+
+            # 대기 시 기존 파일 이동과 새 파일 생성 함수
+            def replace_file(seconds):
+                nonlocal wait_count
+                wait_count += 1
+                logs = 'Oct 14 22:47:50 defense-rocky sshd-session[4371]: Failed password for newuser from 192.0.2.10 port 52723 ssh2\n'
+
+                if wait_count == 1:
+                    path.rename(rotated_path)
+                elif wait_count == 2:
+                    path.write_text(logs, encoding='utf-8')
+                else:
+                    self.fail('파일 교체 후 새 로그가 반환되지 않았습니다.')
+
+            with patch('agent.collector.sleep', side_effect=replace_file):
+                stream = follow_file(path=str(path),
+                                     year=2026,
+                                     agent_id='rocky-agent-01',
+                                     host_id='rocky-vm-01'
+                                     )
 
                 try:
                     event = next(stream)
