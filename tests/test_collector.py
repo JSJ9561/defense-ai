@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, timezone
 
 # 보안 로그 파일 수집 테스트
 class TestCollector(unittest.TestCase):
+    # 여러 줄의 로그 수집 함수
     def test_collect_mixed_logs(self):
         with TemporaryDirectory() as temp_dir:
             path = Path(temp_dir) / 'secure.log'
@@ -137,6 +138,7 @@ class TestFollowFile(unittest.TestCase):
             path.write_text(logs, encoding='utf-8')
 
             appended = False
+
             # 대기 시 새 로그 추가 함수
             def append_new_line(seconds):
                 nonlocal appended
@@ -204,7 +206,7 @@ class TestFollowFile(unittest.TestCase):
 
             wait_count = 0
 
-            # 대기 시 파일 잘림과 새 로그 기록
+            # 대기 시 파일 잘림과 새 로그 기록 함수
             def truncate_and_append(seconds):
                 nonlocal wait_count
                 wait_count += 1
