@@ -2,6 +2,7 @@ from agent.ssh_parser import parse_ssh_event
 from common.event import SecurityEvent
 from time import sleep
 from os import fstat, stat
+from datetime import datetime, timedelta, timezone
 
 # 로그 파일 읽고 공통 이벤트 목록 반환 함수
 def collect_file(
@@ -21,7 +22,7 @@ def collect_file(
 
 # 새 로그를 계속 읽어 이벤트를 전달하는 함수
 def follow_file(
-    path: str, year: int, agent_id: str, host_id: str
+    path: str, agent_id: str, host_id: str
 ):
     first_open = True
 
@@ -68,7 +69,18 @@ def follow_file(
                     sleep(0.2)
                     continue
 
-                event = parse_ssh_event(line, year, agent_id, host_id)
+                # 현재 연도 확인 코드
+                tzinfo = timezone(timedelta(hours=9))
+                current_time = datetime.now(tzinfo)
+                current_year = current_time.year
+
+                # 지연된 연말 로그 연도 보정 코드
+                parts = line.split()
+                if parts:
+                    if current_time.month == 1 and parts[0] == 'Dec':
+                        current_year = current_year - 1
+
+                event = parse_ssh_event(line, current_year, agent_id, host_id)
 
                 if event is not None:
                     yield event
