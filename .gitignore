@@ -25,3 +25,10 @@ experiments/private/
 !.vscode/settings.json
 .DS_Store
 Thumbs.db
+
+# Local event data
+*.jsonl
+*.db
+*.db-journal
+*.db-wal
+*.db-shm

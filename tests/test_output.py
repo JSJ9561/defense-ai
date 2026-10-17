@@ -9,15 +9,19 @@ class TestJsonlOutput(unittest.TestCase):
     def test_append_events(self):
         with TemporaryDirectory() as temp_dir:
             path = Path(temp_dir) / 'events.jsonl'
-            event1 = SecurityEvent.create_login_failure(agent_id='rocky-agent-01',
-                                                        host_id='rocky-vm-01',
-                                                        service='sshd',
-                                                        username='user1')
+            event1 = SecurityEvent.create_login_failure(
+                agent_id='rocky-agent-01',
+                host_id='rocky-vm-01',
+                service='sshd',
+                username='user1'
+            )
 
-            event2 = SecurityEvent.create_login_failure(agent_id='rocky-agent-01',
-                                                        host_id='rocky-vm-01',
-                                                        service='sshd',
-                                                        username='user2')
+            event2 = SecurityEvent.create_login_failure(
+                agent_id='rocky-agent-01',
+                host_id='rocky-vm-01',
+                service='sshd',
+                username='user2'
+            )
 
             append_event_jsonl(path=str(path), event=event1)
             append_event_jsonl(path=str(path), event=event2)
