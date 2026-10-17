@@ -1,4 +1,5 @@
 import unittest
+import sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from agent.collector import collect_file
@@ -15,11 +16,12 @@ class TestCollector(unittest.TestCase):
             logs = 'Oct 14 22:47:50 defense-rocky sshd-session[4371]: Failed password for secadmin from 192.0.2.10 port 52723 ssh2\nOct 14 22:47:54 defense-rocky sshd-session[4371]: Accepted password for secadmin from 192.0.2.10 port 52723 ssh2'
             path.write_text(logs, encoding='utf-8')
 
-            events = collect_file(path=str(path),
-                                  year=2026,
-                                  agent_id='rocky-agent-01',
-                                  host_id='rocky-vm-01'
-                                 )
+            events = collect_file(
+                path=str(path),
+                year=2026,
+                agent_id='rocky-agent-01',
+                host_id='rocky-vm-01'
+            )
 
             self.assertEqual(len(events), 1)
             self.assertEqual(events[0].attributes['username'], 'secadmin')
@@ -33,11 +35,12 @@ class TestCollector(unittest.TestCase):
             logs = ''
             path.write_text(logs, encoding='utf-8')
 
-            events = collect_file(path=str(path),
-                                  year=2026,
-                                  agent_id='rocky-agent-01',
-                                  host_id='rocky-vm-01'
-                                 )
+            events = collect_file(
+                path=str(path),
+                year=2026,
+                agent_id='rocky-agent-01',
+                host_id='rocky-vm-01'
+            )
 
             self.assertEqual(events, [])
 
@@ -71,10 +74,11 @@ class TestFollowFile(unittest.TestCase):
                 with patch('agent.collector.datetime') as mock_datetime:
                     mock_datetime.now.return_value = fixed_now
 
-                    stream = follow_file(path=str(path),
-                                         agent_id='rocky-agent-01',
-                                         host_id='rocky-vm-01'
-                                        )
+                    stream = follow_file(
+                        path=str(path),
+                        agent_id='rocky-agent-01',
+                        host_id='rocky-vm-01'
+                    )
 
                     try:
                         event = next(stream)
@@ -113,10 +117,11 @@ class TestFollowFile(unittest.TestCase):
             with patch('agent.collector.sleep', side_effect=year_change_log):
                 with patch('agent.collector.datetime') as mock_datetime:
                     mock_datetime.now.side_effect = [before_midnight, after_midnight]
-                    stream = follow_file(path=str(path),
-                                         agent_id='rocky-agent-01',
-                                         host_id='rocky-vm-01'
-                                         )
+                    stream = follow_file(
+                        path=str(path),
+                        agent_id='rocky-agent-01',
+                        host_id='rocky-vm-01'
+                    )
 
                     try:
                         event1 = next(stream)
@@ -153,10 +158,11 @@ class TestFollowFile(unittest.TestCase):
             with patch('agent.collector.sleep', side_effect=append_new_line):
                 with patch('agent.collector.datetime') as mock_time:
                     mock_time.now.return_value = fixed_now
-                    stream = follow_file(path=str(path),
-                                         agent_id='rocky-agent-01',
-                                         host_id='rocky-vm-01'
-                                         )
+                    stream = follow_file(
+                        path=str(path),
+                        agent_id='rocky-agent-01',
+                        host_id='rocky-vm-01'
+                    )
 
                     try:
                         event = next(stream)
@@ -185,10 +191,11 @@ class TestFollowFile(unittest.TestCase):
                         self.fail('완성된 로그가 이벤트로 반환되지 않았습니다.')
 
             with patch('agent.collector.sleep', side_effect=append_new_line):
-                stream = follow_file(path=str(path),
-                                     agent_id='rocky-agent-01',
-                                     host_id='rocky-vm-01'
-                                    )
+                stream = follow_file(
+                    path=str(path),
+                    agent_id='rocky-agent-01',
+                    host_id='rocky-vm-01'
+                )
 
                 try:
                     event = next(stream)
@@ -220,10 +227,11 @@ class TestFollowFile(unittest.TestCase):
                     self.fail('파일 잘림 후 새 로그가 반환되지 않았습니다.')
 
             with patch('agent.collector.sleep', side_effect=truncate_and_append):
-                stream = follow_file(path=str(path),
-                                     agent_id='rocky-agent-01',
-                                     host_id='rocky-vm-01'
-                                    )
+                stream = follow_file(
+                    path=str(path),
+                    agent_id='rocky-agent-01',
+                    host_id='rocky-vm-01'
+                )
 
                 try:
                     event = next(stream)
@@ -233,6 +241,10 @@ class TestFollowFile(unittest.TestCase):
                     stream.close()
 
     # 파일 교체 후 수집 검증 함수
+    @unittest.skipIf(
+        sys.platform == 'win32',
+        'Windows에서는 열린 로그 파일의 이름 변경이 제한됩니다.'
+    )
     def test_follow_replaced_file(self):
         with TemporaryDirectory() as temp_dir:
             path = Path(temp_dir) / 'secure_log'
@@ -256,10 +268,11 @@ class TestFollowFile(unittest.TestCase):
                     self.fail('파일 교체 후 새 로그가 반환되지 않았습니다.')
 
             with patch('agent.collector.sleep', side_effect=replace_file):
-                stream = follow_file(path=str(path),
-                                     agent_id='rocky-agent-01',
-                                     host_id='rocky-vm-01'
-                                     )
+                stream = follow_file(
+                    path=str(path),
+                    agent_id='rocky-agent-01',
+                    host_id='rocky-vm-01'
+                )
 
                 try:
                     event = next(stream)
