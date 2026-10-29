@@ -6,7 +6,9 @@ class EventConflictError(ValueError):
     pass
 
 # 중앙 이벤트 저장소 초기화 함수
-def initialize_storage(db_path: str) -> None:
+def initialize_storage(
+        db_path: str
+) -> None:
     connection = sqlite3.connect(db_path)
 
     try:
@@ -21,7 +23,9 @@ def initialize_storage(db_path: str) -> None:
         connection.close()
 
 # 중앙 이벤트 저장 함수
-def store_event(db_path: str, event: SecurityEvent) -> bool:
+def store_event(
+        db_path: str, event: SecurityEvent
+) -> bool:
     connection = sqlite3.connect(db_path)
 
     try:
