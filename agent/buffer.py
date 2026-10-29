@@ -2,7 +2,9 @@ import sqlite3
 from common.event import SecurityEvent
 
 # 이벤트 버퍼 초기화 함수
-def initialize_buffer(db_path: str) -> None:
+def initialize_buffer(
+        db_path: str
+) -> None:
     connection = sqlite3.connect(db_path)
 
     try:
@@ -18,7 +20,9 @@ def initialize_buffer(db_path: str) -> None:
         connection.close()
 
 # 이벤트 버퍼 추가 함수
-def enqueue_event(db_path: str, event: SecurityEvent) -> None:
+def enqueue_event(
+        db_path: str, event: SecurityEvent
+) -> None:
     connection = sqlite3.connect(db_path)
 
     try:
@@ -35,7 +39,9 @@ def enqueue_event(db_path: str, event: SecurityEvent) -> None:
         connection.close()
 
 # 이벤트 버퍼 조회 함수
-def peek_events(db_path: str, limit: int) -> list[SecurityEvent]:
+def peek_events(
+        db_path: str, limit: int
+) -> list[SecurityEvent]:
     if type(limit) is not int:
         raise TypeError('limit은 정수여야 합니다.')
     if limit <= 0:
@@ -66,7 +72,9 @@ def peek_events(db_path: str, limit: int) -> list[SecurityEvent]:
         connection.close()
 
 # 전송 완료 이벤트 삭제 함수
-def acknowledge_event(db_path: str, event_id: str) -> None:
+def acknowledge_event(
+        db_path: str, event_id: str
+) -> None:
     connection = sqlite3.connect(db_path)
 
     try:
@@ -82,7 +90,9 @@ def acknowledge_event(db_path: str, event_id: str) -> None:
         connection.close()
 
 # 이벤트 버퍼 개수 조회 함수
-def count_events(db_path: str) -> int:
+def count_events(
+        db_path: str
+) -> int:
     connection = sqlite3.connect(db_path)
 
     try:

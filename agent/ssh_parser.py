@@ -6,7 +6,9 @@ from datetime import datetime, timedelta, timezone
 from common.event import SecurityEvent
 
 # ssh 로그인 검증 함수
-def parse_ssh_login_failed(line: str) -> dict[str, str] | None:
+def parse_ssh_login_failed(
+        line: str
+) -> dict[str, str] | None:
     # 대상 로그 판별 코드
     if (
         ('sshd-session[' not in line and 'sshd[' not in line)
@@ -56,7 +58,9 @@ MONTHS = {
     "Sep": 9, "Oct": 10, "Nov": 11, "Dec": 12,
 }
 
-def parse_log_timestamp(line: str, year: int) -> str | None:
+def parse_log_timestamp(
+        line: str, year: int
+) -> str | None:
     # 시간 추출 코드
     message = line.split()
 

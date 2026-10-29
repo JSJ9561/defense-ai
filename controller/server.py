@@ -77,7 +77,9 @@ class EventRequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(response_body)
 
 # 중앙 이벤트 수신 서버 실행 함수
-def run_server(host: str, port: int, db_path: str) -> None:
+def run_server(
+        host: str, port: int, db_path: str
+) -> None:
     initialize_storage(db_path=db_path)
     EventRequestHandler.db_path = db_path
     server = HTTPServer((host, port), EventRequestHandler)
